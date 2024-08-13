@@ -12,12 +12,13 @@ class TableController extends Controller
 
     public function index($tableName)
     {
-        $loadingData = $this->tableService->LoadingData($tableName);
+        $loadingData = $this->tableService->loadingData($tableName);
         return response()->json($loadingData);
     }
 
     public function filter(Request $request)
     {
-        // Handle filter parameters and call TableService::getTableData()
+        // $loadingData = $this->tableService->filteringData($request->tableName);
+        return response()->json($loadingData);
     }
 }

@@ -14,6 +14,9 @@ class TableDataResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
+        if($this->resource == null)
+            return [];
+        
         return [
             'id' => $this->resource->id,
             'name' => $this->resource->name,

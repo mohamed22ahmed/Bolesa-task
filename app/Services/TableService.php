@@ -13,7 +13,7 @@ use Illuminate\Support\Facades\Schema;
 
 class TableService
 {
-    public function LoadingData($tableName){
+    public function loadingData($tableName){
         $tableStructure = $this->getTableStructure($tableName);
         $tableFilters = $this->getTableFilters($tableName);
         $tableData = $this->getTableData($tableName, 10/*elements per page*/);
@@ -36,6 +36,8 @@ class TableService
     private function getTableFilters($tableName)
     {
         $model = $this->getModelFromTableName($tableName);
+        if(!$model)
+            return [];
         $filterable = $model::$filterable;
         $sortable = $model::$sortable;
 
@@ -56,6 +58,8 @@ class TableService
     private function getTableData($tableName, $elementsPerPage)
     {
         $model = $this->getModelFromTableName($tableName);
+        if(!$model)
+            return [];
         $query = $model->query();
         return $query->paginate($elementsPerPage);
     }
@@ -77,7 +81,9 @@ class TableService
     {
         $modelName = $this->makeSingle(str_replace('_', '', ucwords($tableName, '_')));
         $modelClass = 'App\\Models\\' . $modelName;
-        return App::make($modelClass);
+        if(class_exists($modelClass))
+            return App::make($modelClass);
+        return [];
     }
 
     public function getTableDataww($tableName, Request $request)
