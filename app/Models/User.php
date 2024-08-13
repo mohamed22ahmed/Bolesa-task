@@ -3,6 +3,7 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -16,12 +17,15 @@ class User extends Authenticatable
      *
      * @var array<int, string>
      */
-    protected $fillable = [
-        'name',
-        'email',
-        'password',
-    ];
+    protected $fillable = ['name','email','password',];
 
+    public static $sortable = ['name', 'email', 'created_at'];
+    public static $filterable = ['name', 'email'];
+
+    public static function getFilterableAttributes()
+    {
+        return static::$filterable;
+    }
     /**
      * The attributes that should be hidden for serialization.
      *
