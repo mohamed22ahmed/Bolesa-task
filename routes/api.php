@@ -10,4 +10,4 @@ Route::get('/user', function (Request $request) {
 
 
 Route::get('/loading-data/{table}', [TableController::class, 'index']);
-Route::post('/table/filter', [TableController::class, 'filter']);
+Route::post('/filtering-data', [TableController::class, 'filteringData']);

@@ -16,9 +16,9 @@ class TableController extends Controller
         return response()->json($loadingData);
     }
 
-    public function filter(Request $request)
+    public function filteringData(Request $request)
     {
-        // $loadingData = $this->tableService->filteringData($request->tableName);
-        // return response()->json($loadingData);
+        $filteredData = $this->tableService->filteringData($request);
+        return response()->json($filteredData);
     }
 }

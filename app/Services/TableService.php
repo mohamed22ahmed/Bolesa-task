@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Http\Resources\APi\LoadingDataResource;
+use App\Http\Resources\APi\TableDataResource;
 use App\Http\Resources\APi\TableStructureResource;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
@@ -84,32 +85,53 @@ class TableService
         return App::make($modelClass);
     }
 
-    public function getTableDataww($tableName, Request $request)
+    public function filteringData(Request $request)
     {
-        $model = $this->getModelFromTableName($tableName);
+        $model = $this->getModelFromTableName($request->input('tableName'));
         $query = $model->query();
 
-        $filters = $request->input('filters', ['name' => 'moha']);
-        $sorts = $request->input('sorts', ['name' => 'asc']);
+        // dd($request->input('filters'));
+        $filters = $request->input('filters');
+        $sorts = $request->input('sorts');
         $filterable = $model::$filterable;
         $sortable = $model::$sortable;
 
-        foreach ($filters as $column => $value) {
-            if(in_array($column, $filterable)){
-                if(is_string($value))
-                    $query->where($column, 'like', '%'.$value.'%');
-                else
-                    $query->where($column, $value);
+        if($filters){
+            foreach ($filters as $column => $value) {
+                if(in_array($column, $filterable)){
+                    if(is_string($value))
+                        $query->where($column, 'like', '%'.$value.'%');
+                    else
+                        $query->where($column, $value);
+                }
+            }
+        }
+        
+        if($sorts){
+            foreach ($sorts as $value => $order) {
+                if(in_array($value, $sortable)){
+                    $query->orderBy($value, $order);
+                }
             }
         }
 
-        foreach ($sorts as $value => $order) {
-            if(in_array($column, $sortable))
-                $query->orderBy($value, $order);
-        }
-
-        $results = $query->get();
-
-        return $results;
+        $results = $query->paginate(10);
+        
+        return response()->json(['data' => [
+            'items' =>TableDataResource::collection($results),
+            'pagination'=> [
+                'meta' => [
+                    'total' => $results->total(),
+                    'per_page' => $results->perPage(),
+                    'current_page' => $results->currentPage(),
+                    'last_page' => $results->lastPage(),
+                ],
+                'links' => [
+                    'self' => $results->url(null, $results->currentPage()),
+                    'prev' => $results->previousPageUrl(),
+                    'next' => $results->nextPageUrl(),
+                ]
+            ]
+        ]]);
     }
 }
