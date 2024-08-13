@@ -36,8 +36,6 @@ class TableService
     private function getTableFilters($tableName)
     {
         $model = $this->getModelFromTableName($tableName);
-        if(!$model)
-            return [];
         $filterable = $model::$filterable;
         $sortable = $model::$sortable;
 
@@ -58,32 +56,32 @@ class TableService
     private function getTableData($tableName, $elementsPerPage)
     {
         $model = $this->getModelFromTableName($tableName);
-        if(!$model)
-            return [];
+
         $query = $model->query();
         return $query->paginate($elementsPerPage);
     }
 
     private function makeSingle(string $className){
-        if (substr($className, -2) == 'es') {
-            return substr($className, 0, -2);
-        } elseif (substr($className, -1) == 's') {
+        if (substr($className, -3) == 'ges') {
             return substr($className, 0, -1);
-        }elseif (substr($className, -3) == 'ies') {
+        }
+        if (substr($className, -2) == 'es')
+            return substr($className, 0, -2);
+        if (substr($className, -1) == 's')
+            return substr($className, 0, -1);
+        if (substr($className, -3) == 'ies') {
             $word = substr($className, 0, -2);
             return $word.'y';
-        }else {
-            return $className; // Handle irregular forms or unknown patterns
         }
+        return $className;
     }
 
     private function getModelFromTableName($tableName)
     {
         $modelName = $this->makeSingle(str_replace('_', '', ucwords($tableName, '_')));
         $modelClass = 'App\\Models\\' . $modelName;
-        if(class_exists($modelClass))
-            return App::make($modelClass);
-        return [];
+
+        return App::make($modelClass);
     }
 
     public function getTableDataww($tableName, Request $request)
