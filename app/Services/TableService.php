@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Http\Resources\APi\LoadingDataResource;
+use App\Http\Resources\APi\PaginationResource;
 use App\Http\Resources\APi\TableDataResource;
 use App\Http\Resources\APi\TableStructureResource;
 use App\Models\User;
@@ -90,12 +91,24 @@ class TableService
         $model = $this->getModelFromTableName($request->input('tableName'));
         $query = $model->query();
 
-        // dd($request->input('filters'));
         $filters = $request->input('filters');
         $sorts = $request->input('sorts');
         $filterable = $model::$filterable;
         $sortable = $model::$sortable;
 
+        $this->applyFilters($query, $filters, $filterable);
+        $this->applySorts($query, $sorts, $sortable);
+        
+        $results = $query->paginate(10);
+        
+        return response()->json(['data' => [
+                'items' => TableDataResource::collection($results),
+                'pagination'=> new PaginationResource($results)
+            ]
+        ]);
+    }
+
+    private function applyFilters(&$query, $filters, $filterable){
         if($filters){
             foreach ($filters as $column => $value) {
                 if(in_array($column, $filterable)){
@@ -106,7 +119,9 @@ class TableService
                 }
             }
         }
-        
+    }
+    
+    private function applySorts(&$query, $sorts, $sortable){
         if($sorts){
             foreach ($sorts as $value => $order) {
                 if(in_array($value, $sortable)){
@@ -114,24 +129,5 @@ class TableService
                 }
             }
         }
-
-        $results = $query->paginate(10);
-        
-        return response()->json(['data' => [
-            'items' =>TableDataResource::collection($results),
-            'pagination'=> [
-                'meta' => [
-                    'total' => $results->total(),
-                    'per_page' => $results->perPage(),
-                    'current_page' => $results->currentPage(),
-                    'last_page' => $results->lastPage(),
-                ],
-                'links' => [
-                    'self' => $results->url(null, $results->currentPage()),
-                    'prev' => $results->previousPageUrl(),
-                    'next' => $results->nextPageUrl(),
-                ]
-            ]
-        ]]);
     }
 }

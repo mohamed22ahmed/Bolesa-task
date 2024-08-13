@@ -20,19 +20,7 @@ class LoadingDataResource extends JsonResource
             'filters' => TableFiltersResource::collection($this->resource['tableFilters']),
             'data' => [
                 'items' =>TableDataResource::collection($this->resource['tableData']),
-                'pagination'=> [
-                    'meta' => [
-                        'total' => $this->resource['tableData']->total(),
-                        'per_page' => $this->resource['tableData']->perPage(),
-                        'current_page' => $this->resource['tableData']->currentPage(),
-                        'last_page' => $this->resource['tableData']->lastPage(),
-                    ],
-                    'links' => [
-                        'self' => $this->resource['tableData']->url(null, $this->resource['tableData']->currentPage()),
-                        'prev' => $this->resource['tableData']->previousPageUrl(),
-                        'next' => $this->resource['tableData']->nextPageUrl(),
-                    ]
-                ]
+                'pagination'=> new PaginationResource($this->resource['tableData'])
             ]
         ];
     }
